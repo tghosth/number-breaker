@@ -50,11 +50,40 @@ def postrequest( url, values ):
     rsp = urllib2.urlopen(req)
     return rsp.read();
 
+
+def usage():
+    print 'WRONG FLAGS!!!!!!'
+
+def processargs(argv):
+    try:
+        opts, args = getopt.getopt(argv, "u:", ["url="])
+
+    except getopt.GetoptError:
+        usage()
+        sys.exit(2)
+
+    for opt, arg in opts:
+        if opt in ("-u", "--url"):
+            print "urlString = "+ arg
+            global urlString
+            urlString = arg
+    return;
+
+global urlString
+urlString = ""
+
+
+processargs(sys.argv[1:])
+
+if urlString == "": urlString = 'http://s37109-102007-bxw.tarentum.hack.me/'
+
+
+
 cookie_jar = cookielib.CookieJar()
 opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookie_jar))
 urllib2.install_opener(opener)
 
-urlString = 'http://s37109-102007-bxw.tarentum.hack.me/'
+
 
 # acquire cookie
 rsp_html = getrequest(urlString+'number.php')
