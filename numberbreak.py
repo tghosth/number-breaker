@@ -1,5 +1,5 @@
 __author__ = 'joshg'
-import urllib, urllib2, cookielib
+import urllib, urllib2, cookielib, os.path, sys, getopt
 from bs4 import BeautifulSoup
 
 def getcorrectnumbervalue(htmltext):
@@ -8,6 +8,8 @@ def getcorrectnumbervalue(htmltext):
     parsed_html = BeautifulSoup(htmltext,"html.parser")
 
     print parsed_html.body.form.p
+
+    print 'Score: ' + parsed_html.body.div.p.text.split("Score:")[1]
 
     numberstringminmax = parsed_html.body.form.p.text
 
@@ -37,18 +39,16 @@ def getcorrectnumbervalue(htmltext):
 
     return finalval;
 
-def meta_redirect(content):
-    "Get a meta refresh URL. From: http://stackoverflow.com/questions/2318446/how-to-follow-meta-refreshes-in-python"
-    soup  = BeautifulSoup(content)
+def getrequest( url ):
+    req = urllib2.Request(url)
+    rsp = urllib2.urlopen(req)
+    return rsp.read();
 
-    result=soup.find("meta",attrs={"http-equiv":"refresh"})
-    if result:
-        wait,text=result["content"].split(";")
-        if text.lower().startswith("url="):
-            url=text[4:]
-            return url
-    return None
-
+def postrequest( url, values ):
+    data = urllib.urlencode(values)
+    req = urllib2.Request(url, data)
+    rsp = urllib2.urlopen(req)
+    return rsp.read();
 
 cookie_jar = cookielib.CookieJar()
 opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookie_jar))
@@ -57,25 +57,14 @@ urllib2.install_opener(opener)
 urlString = 'http://s37109-102007-bxw.tarentum.hack.me/'
 
 # acquire cookie
-url_1 = urlString+'number.php'
-req = urllib2.Request(url_1)
-rsp = urllib2.urlopen(req)
-rsp_html = rsp.read()
+rsp_html = getrequest(urlString+'number.php')
 # print rsp_html
 
 
+while True:
+    currNum = getcorrectnumbervalue(rsp_html)
 
-currNum = getcorrectnumbervalue(rsp_html)
+    content = postrequest(urlString+'proc.php ', dict(number=currNum, submit='submit'))
 
+    rsp_html = getrequest(urlString+'number.php')
 
-# # do POST
-url_2 = urlString+'proc.php '
-values = dict(number=currNum, submit='submit')
-data = urllib.urlencode(values)
-req = urllib2.Request(url_2, data)
-rsp = urllib2.urlopen(req)
-content = rsp.read()
-
-url = meta_redirect(content)
-
-print content
