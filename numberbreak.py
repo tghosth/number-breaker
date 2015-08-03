@@ -23,8 +23,8 @@ def getcorrectnumbervalue(htmltext):
         maxnum = True
         numberstring = numberstringminmax.decode("utf-8").replace(u'The maximum number?',u'')
 
-    minval=0
-    maxval=0
+    minval=1000000
+    maxval=-1000000
 
     for currNum in numberstring.split(", "):
         if int(currNum) > maxval: maxval = int(currNum)
