@@ -37,13 +37,27 @@ def getcorrectnumbervalue(htmltext):
 
     return finalval;
 
+def meta_redirect(content):
+    "Get a meta refresh URL. From: http://stackoverflow.com/questions/2318446/how-to-follow-meta-refreshes-in-python"
+    soup  = BeautifulSoup(content)
+
+    result=soup.find("meta",attrs={"http-equiv":"refresh"})
+    if result:
+        wait,text=result["content"].split(";")
+        if text.lower().startswith("url="):
+            url=text[4:]
+            return url
+    return None
+
 
 cookie_jar = cookielib.CookieJar()
 opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookie_jar))
 urllib2.install_opener(opener)
 
+urlString = 'http://s37109-102007-bxw.tarentum.hack.me/'
+
 # acquire cookie
-url_1 = 'http://s37109-102007-bxw.tarentum.hack.me/number.php'
+url_1 = urlString+'number.php'
 req = urllib2.Request(url_1)
 rsp = urllib2.urlopen(req)
 rsp_html = rsp.read()
@@ -51,22 +65,17 @@ rsp_html = rsp.read()
 
 
 
-
-
-print str(getcorrectnumbervalue(rsp_html))
-
-
-
-# .toString()
-# .split('<br/>')
+currNum = getcorrectnumbervalue(rsp_html)
 
 
 # # do POST
-# url_2 = 'http://www.bkstr.com/webapp/wcs/stores/servlet/BuybackSearch'
-# values = dict(isbn='9780131185838', schoolStoreId='15828', catalogId='10001')
-# data = urllib.urlencode(values)
-# req = urllib2.Request(url_2, data)
-# rsp = urllib2.urlopen(req)
-# content = rsp.read()
+url_2 = urlString+'proc.php '
+values = dict(number=currNum, submit='submit')
+data = urllib.urlencode(values)
+req = urllib2.Request(url_2, data)
+rsp = urllib2.urlopen(req)
+content = rsp.read()
 
-# print content
+url = meta_redirect(content)
+
+print content
