@@ -50,13 +50,17 @@ def postrequest( url, values ):
     rsp = urllib2.urlopen(req)
     return rsp.read();
 
+def writetofile(filename, text):
+    f = open(filename, 'a')
+    f.write(text+'\n')
+    f.close()
 
 def usage():
     print 'WRONG FLAGS!!!!!!'
 
 def processargs(argv):
     try:
-        opts, args = getopt.getopt(argv, "u:", ["url="])
+        opts, args = getopt.getopt(argv, "u:of:", ["url=", "output", "file="])
 
     except getopt.GetoptError:
         usage()
@@ -67,16 +71,32 @@ def processargs(argv):
             print "urlString = "+ arg
             global urlString
             urlString = arg
+        elif opt in ("-o","--output"):
+            print "DoOutput = True"
+            global DoOutput
+            DoOutput = True
+        elif opt in ("-f","--file"):
+            global OutputFile
+            print "OutputFile = "+ arg
+            OutputFile = arg
     return;
 
 global urlString
 urlString = ""
-
+global OutputFile
+OutputFile= ""
+global DoOutput
+DoOutput = False
 
 processargs(sys.argv[1:])
 
 if urlString == "": urlString = 'http://s37109-102007-bxw.tarentum.hack.me/'
+if (OutputFile == "") and (DoOutput): OutputFile = os.path.dirname(os.path.abspath(__file__)) + '\output.txt'
 
+
+if os.path.isfile(OutputFile):
+    print 'FILE: "' + OutputFile + '" already exists!'
+    sys.exit(2)
 
 
 cookie_jar = cookielib.CookieJar()
@@ -91,9 +111,17 @@ rsp_html = getrequest(urlString+'number.php')
 
 
 while True:
+
+    if DoOutput: writetofile(OutputFile, rsp_html+"\n\n\n")
+
     currNum = getcorrectnumbervalue(rsp_html)
 
+    if DoOutput: writetofile(OutputFile, "Number sent: " + str(currNum) + "\n\n\n")
+
+
     content = postrequest(urlString+'proc.php ', dict(number=currNum, submit='submit'))
+
+    if DoOutput: writetofile(OutputFile, content+"\n\n\n")
 
     rsp_html = getrequest(urlString+'number.php')
 
