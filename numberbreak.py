@@ -2,6 +2,42 @@ __author__ = 'joshg'
 import urllib, urllib2, cookielib
 from bs4 import BeautifulSoup
 
+def getcorrectnumbervalue(htmltext):
+    "Parses the HTML text and gets out the required number"
+
+    parsed_html = BeautifulSoup(htmltext,"html.parser")
+
+    print parsed_html.body.form.p
+
+    numberstringminmax = parsed_html.body.form.p.text
+
+    numberstring = numberstringminmax.decode("utf-8").replace(u'The minimum number?',u'')
+
+    maxnum = True
+
+    if len(numberstring) != len(numberstringminmax.decode("utf-8")):
+        maxnum = False
+    else:
+        maxnum = True
+        numberstring = numberstringminmax.decode("utf-8").replace(u'The maximum number?',u'')
+
+    minval=0
+    maxval=0
+
+    for currNum in numberstring.split(", "):
+        if int(currNum) > maxval: maxval = int(currNum)
+        if int(currNum) < minval: minval = int(currNum)
+
+    finalval = 0
+
+    if maxnum:
+        finalval=maxval
+    else:
+        finalval=minval
+
+    return finalval;
+
+
 cookie_jar = cookielib.CookieJar()
 opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookie_jar))
 urllib2.install_opener(opener)
@@ -14,25 +50,10 @@ rsp_html = rsp.read()
 # print rsp_html
 
 
-parsed_html = BeautifulSoup(rsp_html,"html.parser")
 
-print "Parsed version:"
-numberStringMinMax = parsed_html.body.form.p.text
 
-numberString = numberStringMinMax.decode("utf-8").replace(u'The minimum number?',u'')
 
-maxNum = True
-
-if len(numberString) != len(numberStringMinMax.decode("utf-8")):
-    maxNum = False
-else:
-    maxNum = True
-    numberString = numberStringMinMax.decode("utf-8").replace(u'The maximum number?',u'')
-
-print numberString.split(", ")
-
-minVal=0
-maxVal=0
+print str(getcorrectnumbervalue(rsp_html))
 
 
 
