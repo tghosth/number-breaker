@@ -60,7 +60,7 @@ def usage():
 
 def processargs(argv):
     try:
-        opts, args = getopt.getopt(argv, "u:of:", ["url=", "output", "file="])
+        opts, args = getopt.getopt(argv, "vu:of:", ["verbose", "url=", "output", "file="])
 
     except getopt.GetoptError:
         usage()
@@ -79,6 +79,10 @@ def processargs(argv):
             global OutputFile
             print "OutputFile = "+ arg
             OutputFile = arg
+        elif opt in ("-v","--verbose"):
+            global VerboseMode
+            print "VerboseMode = True"
+            VerboseMode = True
     return;
 
 global urlString
@@ -93,22 +97,25 @@ processargs(sys.argv[1:])
 if urlString == "": urlString = 'http://s37109-102007-bxw.tarentum.hack.me/'
 if (OutputFile == "") and (DoOutput): OutputFile = os.path.dirname(os.path.abspath(__file__)) + '\output.txt'
 
+if VerboseMode: print "[+] Parameters assigned"
 
 if os.path.isfile(OutputFile):
     print 'FILE: "' + OutputFile + '" already exists!'
     sys.exit(2)
 
+if VerboseMode: print "[+] Output file checked"
 
 cookie_jar = cookielib.CookieJar()
 opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookie_jar))
 urllib2.install_opener(opener)
 
-
+if VerboseMode: print "[+] Cookies configured"
 
 # acquire cookie
 rsp_html = getrequest(urlString+'number.php')
 # print rsp_html
 
+if VerboseMode: print "[+] Got first request"
 
 while True:
 
@@ -116,12 +123,16 @@ while True:
 
     currNum = getcorrectnumbervalue(rsp_html)
 
+    if VerboseMode: print "[+] Got correct number to send ("+ str(currNum) + ")"
+
     if DoOutput: writetofile(OutputFile, "Number sent: " + str(currNum) + "\n\n\n")
 
-
     content = postrequest(urlString+'proc.php ', dict(number=currNum, submit='submit'))
+
+    if VerboseMode: print "[+] Sent number as POST request"
 
     if DoOutput: writetofile(OutputFile, content+"\n\n\n")
 
     rsp_html = getrequest(urlString+'number.php')
 
+    if VerboseMode: print "[+] Getting next GET request"
