@@ -1,4 +1,4 @@
-#!python
+#!/usr/bin/python
 # __author__ = 'joshg'
 import urllib, urllib2, cookielib, os.path, sys, getopt
 from bs4 import BeautifulSoup
