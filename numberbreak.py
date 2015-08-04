@@ -84,7 +84,8 @@ def processargs(argv):
             print "VerboseMode = True"
             VerboseMode = True
     return;
-
+global VerboseMode
+VerboseMode = False
 global urlString
 urlString = ""
 global OutputFile
